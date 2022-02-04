@@ -13,7 +13,7 @@ class JsonParser:
 		else:
 			raise TypeError("Expecting a str or dict or list")
 
-	def get(self, path):
+	def get(self, path, search_status=False):
 		is_found = True
 		current_value = copy.deepcopy(self.__json_dict)
 
@@ -23,11 +23,17 @@ class JsonParser:
 				if isinstance(current_value, list):
 					try:
 						index = int(key[1:-1])
-					except ValueError:
-						raise ValueError("Expecting an integer between '[' and ']'")
-					current_value = current_value[index]
+						current_value = current_value[index]
+					except ValueError as e:
+						e.args = ("Expecting an integer between '[' and ']'",)
+						raise
+					except IndexError:
+						is_found = False
+						current_value = None
+						break
 				else:
 					is_found = False
+					current_value = None
 					break
 			else:
 				if isinstance(current_value, dict):
@@ -35,12 +41,14 @@ class JsonParser:
 						current_value = current_value[key]
 					else:
 						is_found = False
+						current_value = None
 						break
 				else:
 					is_found = False
+					current_value = None
 					break
 
-		return (is_found, current_value) if is_found else (is_found, None)
+		return (is_found, current_value) if search_status else current_value
 
 	def set(self, path, value):
 		current_value = self.__json_dict
@@ -107,10 +115,10 @@ class JsonParser:
 
 
 if __name__ == "__main__":
-	jp = JsonParser()
-	jp.set("name.first_name", "Partha")
-	jp.set("name.middle_name", "Pratim")
-	jp.set("name.last_name", "Manna")
-	jp.set("greeting", "Hello everyone")
-	print(jp)
-	print(json.dumps(jp.get_json_dict(), indent="\t"))
+	jp = JsonParser(open("resources\\temp.json").read())
+	# jp.set("name.first_name", "Partha")
+	# jp.set("name.middle_name", "Pratim")
+	# jp.set("name.last_name", "Manna")
+	# jp.set("greeting", "Hello everyone")
+	print(jp.get("countries.[3].vb"))
+	#print(json.dumps(jp.get_json_dict(), indent="\t"))
