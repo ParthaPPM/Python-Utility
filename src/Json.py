@@ -2,7 +2,7 @@ import copy
 import json
 
 
-class JsonParser:
+class JsonModifier:
 	def __init__(self, json_dict_or_string=None):
 		if json_dict_or_string is None:
 			self.__json_dict = None
@@ -107,6 +107,19 @@ class JsonParser:
 		else:
 			current_value[key] = value
 
+	def search(self, search_query):
+		if isinstance(self.__json_dict, list):
+			if isinstance(search_query, dict):
+				result_list = []
+				for document in self.__json_dict:
+					if search_query.items() <= document.items():
+						result_list.append(document)
+				return result_list
+			else:
+				raise ValueError("The search query must be a dictionary")
+		else:
+			raise ValueError("The set JSON must be a list")
+
 	def get_json_dict(self):
 		return self.__json_dict
 
@@ -115,10 +128,6 @@ class JsonParser:
 
 
 if __name__ == "__main__":
-	jp = JsonParser(open("resources\\temp.json").read())
-	# jp.set("name.first_name", "Partha")
-	# jp.set("name.middle_name", "Pratim")
-	# jp.set("name.last_name", "Manna")
-	# jp.set("greeting", "Hello everyone")
-	print(jp.get("countries.[3].vb"))
-	#print(json.dumps(jp.get_json_dict(), indent="\t"))
+	jp = JsonModifier(open("resources\\temp.json").read())
+	result = jp.search({})
+	print(len(result))
